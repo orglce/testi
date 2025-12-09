@@ -1,0 +1,167 @@
+Overview
+
+This is a step‑by‑step implementation plan for a small web app (HTML/CSS/JS) using Supabase (Supabase JS via CDN) for backend. The app lets teachers add/edit test entries on a calendar, filter by grade, and view per‑day tests. Credentials may be stored in plain JavaScript (for this project only).
+
+Files to produce
+
+1. index.html — main page, loads CDN libs (Supabase JS, a calendar library like FullCalendar via CDN), links to styles and main script.
+2. styles.css — all page styles, calendar styling, color legend, responsive rules.
+3. app.js — main client logic: Supabase init, data model, CRUD operations, calendar wiring, UI interactions, grade filter, tooltips.
+4. README.txt — short run/setup instructions and Supabase table SQL.
+
+Supabase setup (instructions to run once)
+
+1. Create a Supabase project and note `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
+2. Create a table `tests` with the following columns:
+
+   * id: uuid, primary key, default uuid_generate_v4()
+   * date: date, not null
+   * grade: text, not null (values like "1a", "1b", ..., "9b")
+   * subject: text, not null
+   * description: text, optional (notes, duration)
+   * created_by: text, optional (teacher id/email)
+   * created_at: timestamptz, default now()
+3. (Optional) Create an index on (date) and (grade).
+
+Subjects (suggested list)
+
+* Mathematics
+* Slovene
+* English
+* Physics
+* Chemistry
+* Biology
+* History
+* Geography
+* Art
+* Music
+* Physical Education
+* Informatics
+* Ethics
+* Foreign Language 2 (e.g., German)
+
+High‑level app flow
+
+1. On page load: initialize Supabase client with CDN script and credentials in app.js.
+2. Fetch tests from Supabase for a reasonable range (current month ± 1 month) and render them on the calendar.
+3. Calendar shows days with tests in a colored dot or full‑day background. Days with multiple tests show aggregation.
+4. Clicking a calendar date opens a tooltip/dialog listing tests for that date and offers actions: Add Test, Edit Test (for each existing), Delete Test, Add Another.
+5. Adding a test opens a small inline form (subject select, grade dropdown, date prefilled, description optional, Save/Cancel).
+6. Editing opens the same form prefilled; saving updates Supabase and calendar UI.
+7. Grade filter dropdown (global) — when a grade is selected, calendar displays only tests for that grade; a clear filter option resets to all grades.
+8. When a grade filter is active, the calendar still supports per‑day Add/Edit but default subject/grade inputs should respect the active grade (preselect it).
+
+UI details and interactions
+
+* Layout: header with app title, grade filter dropdown, legend showing subject colors; main area with calendar; a floating help button.
+* Calendar interaction details:
+  • Click empty date -> open tooltip with option "Add Test".
+  • Click date that has tests -> open tooltip listing tests (sorted by grade then subject) and actions per test: Edit, Delete, Duplicate.
+  • Tooltip includes a compact Add Test button at the bottom.
+  • Visuals: color the date cell with a badge color if there is at least one test. Use different colors per subject (subject → color map). If a specific grade is filtered, only color if that grade has tests on that date; show a small stack or numbered badge for count.
+* Accessibility: keyboard focus for forms, labels for selects, visible contrast for colors.
+
+Data & sync behavior
+
+* Local state: maintain an in‑memory cache of tests currently in view (for the current calendar range). Keep it keyed by date for fast lookups.
+* CRUD operations:
+  • Create: insert into Supabase, on success update local cache and calendar event rendering.
+  • Read: fetch by date range with `supabase.from('tests').select('*').gte('date', start).lte('date', end)`.
+  • Update: call `.update()` with id and fields; on success update cache and UI.
+  • Delete: call `.delete()` with id; on success remove from cache and UI.
+* Error handling: show non‑blocking toast/snackbar on failure, with a retry button.
+* Concurrency: optimistic UI update is allowed but revert on backend error.
+
+Calendar library suggestions
+
+Use a simple CDN calendar to minimize bundle pain. Example: FullCalendar (vanilla) via CDN. The calendar should support dayClick handler and custom rendering of day cells.
+
+Implementation steps for the agentic code editor AI
+
+1. Project scaffold
+   a. Create the file structure and minimal HTML that loads FullCalendar and Supabase JS via CDN and links styles.css and app.js.
+   b. Add meta tags and a container `<div id="calendar"></div>`.
+
+2. Supabase initialization
+   a. In app.js, add constants `SUPABASE_URL` and `SUPABASE_ANON_KEY` (values placed as plain JS variables as requested).
+   b. Initialize the client: `const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)` (use real CDN import name used by library).
+
+3. Database schema code (in README.txt)
+   a. Provide the SQL for `tests` table as shown above (copy exact CREATE TABLE statement).
+
+4. Calendar rendering & fetch
+   a. On DOMContentLoaded, initialize FullCalendar with the desired view (month) and set `dateClick` handler.
+   b. When calendar needs data (initial or view change), compute view start/end dates, fetch tests from Supabase within that range, populate local cache.
+   c. For each date that has tests, call calendar API to mark the date cell (use FullCalendar’s event API or custom dayCellDidMount rendering to inject badges).
+
+5. Grade filter
+   a. Create a dropdown with grades from 1a..9b (two letter variants for each number: a and b). Prepopulate options programmatically.
+   b. On change, re‑render calendar highlights showing only tests matching the selected grade. If empty value -> show all.
+
+6. Add Test flow
+   a. When user clicks a day and chooses Add Test, open an inline form (modal or small popover) with fields: Grade (dropdown), Subject (dropdown), Description (text), Save/Cancel.
+   b. On Save: validate fields, insert row into `tests`, then update local cache and re-render affected day(s). Close form.
+
+7. Edit/Delete/Duplicate flows
+   a. Edit: open form prefilled; on Save call `.update()` and update cache/UI.
+   b. Delete: confirm, call `.delete()` then remove from cache/UI.
+   c. Duplicate: open Add form prefilled with selected test values but different id; save will create new row for chosen date.
+
+8. Tooltip content & UX
+   a. Implement a popover UI that lists tests for the day with their grade, subject, and short description. Include action buttons for each test (Edit, Delete, Duplicate).
+   b. If there are no tests, show a friendly empty state and the Add Test button.
+
+9. Visual design
+   a. Create a subject→color map. Use 10–14 distinct pastel colors. Provide CSS classes for `.subject-math`, `.subject-slovene`, etc., and apply using inline styles when rendering badges.
+   b. Add legend in the header showing subject names and swatches.
+
+10. Filtering & combined views
+    a. Add a control to toggle "Show only selected grade" vs "Show all grades". When showing all, day cells may show small stacked indicators per grade or a single colored dot when multiple subjects share the same subject color.
+
+11. Testing & validation
+    a. Add unit tests (optional) or manual test checklist: create tests, edit, delete, filter by grade, month navigation, edge cases (multiple tests same day), daylight savings/timezone handling for dates.
+
+12. Deployment notes
+    a. The app is static — can be hosted on GitHub Pages or any static host. The only dynamic part is Supabase.
+    b. Reminder: storing Supabase anon key in plain JS is acceptable for prototype but not secure for production. Recommend server side or Row Level Security (RLS) policies for production.
+
+Agentic task breakdown (atomic tasks for the code editor AI)
+
+1. Create base HTML file with required CDN script tags and container elements.
+2. Create CSS file with layout, badge, tooltip, modal and legend styles.
+3. Write `app.js` stepwise:
+
+   * add Supabase client init
+   * implement grade/subject lists
+   * implement functions: fetchTests(range), createTest(data), updateTest(id,data), deleteTest(id)
+   * implement cache structure and utilities getByDate(date), addToCache(item), removeFromCache(id)
+   * wire FullCalendar initialization and day cell render hooks
+   * implement date click handler to open tooltip and list tests
+   * implement add/edit forms and their submit handlers
+   * implement grade filter binding
+   * implement UI update helpers to repaint only affected dates
+4. Add README and SQL for table creation.
+5. Run local manual checklist and fix UI bugs.
+
+Extra helpful snippets to include in `app.js` (pseudo code guidance)
+
+* Grade list generator:
+  for n in 1..9: push(`${n}a`); push(`${n}b`)
+
+* Subject list: use the list from earlier. Create a `const SUBJECT_COLORS = { Mathematics: '#...'} ` mapping.
+
+* Example fetch call:
+  const { data, error } = await supabase
+  .from('tests')
+  .select('*')
+  .gte('date', start)
+  .lte('date', end)
+
+* Example insert call:
+  const { data, error } = await supabase.from('tests').insert([{ date, grade, subject, description }])
+
+Deliverable
+
+* Single text file (this file) with the plan and the explicit step list above.
+
+If you want, I can also generate the actual index.html, styles.css and app.js files now (ready for the agentic editor to copy into the repo).

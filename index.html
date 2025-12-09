@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koledar šolskih preizkusov znanja</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/locales/sl.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Koledar šolskih preizkusov znanja</h1>
+    <div class="controls">
+      <label for="grade-filter">Razred:</label>
+      <div id="gradeButtons" class="grade-buttons"></div>
+      <div id="legend"></div>
+    </div>
+  </header>
+  <main>
+    <div id="calendar"></div>
+    <button id="help-btn" title="Pomoč">?</button>
+  </main>
+  <div id="tooltip"></div>
+  <div id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
