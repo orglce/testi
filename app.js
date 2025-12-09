@@ -16,32 +16,14 @@ const SUBJECTS = [
   "Slovenščina",
   "Angleščina",
   "Fizika",
-  "Kemija",
-  "Biologija",
-  "Zgodovina",
-  "Geografija",
-  "Likovna umetnost",
-  "Glasba",
-  "Šport",
-  "Informatika",
-  "Etika",
-  "Tuji jezik 2",
+  "DRUGO"
 ];
 const SUBJECT_COLORS = {
   "Matematika": "#f7b267",
   "Slovenščina": "#a0c4ff",
   "Angleščina": "#ffd6a5",
   "Fizika": "#bdb2ff",
-  "Kemija": "#caffbf",
-  "Biologija": "#9bf6ff",
-  "Zgodovina": "#fdffb6",
-  "Geografija": "#ffc6ff",
-  "Likovna umetnost": "#ffadad",
-  "Glasba": "#b5ead7",
-  "Šport": "#fbe7c6",
-  "Informatika": "#d0f4de",
-  "Etika": "#e2f0cb",
-  "Tuji jezik 2": "#c2c2f0",
+  "DRUGO": "#caffbf",
 };
 
 // Grade colors
@@ -328,18 +310,28 @@ function showTooltip(date, x, y) {
   addBtn.onclick = () => openTestForm(date);
   tooltip.appendChild(addBtn);
 }
+
 function hideTooltip() {
-  const tooltip = document.querySelector(".form-modal") ;
-  if (tooltip) tooltip.remove();
-  console.log("hideTooltip");
-  
+  const tooltip = document.getElementById("tooltip");
+  if (tooltip) tooltip.classList.remove("visible");
+  const form = document.querySelector(".form-modal");
+  if (form) form.remove();
 }
+
 document.addEventListener("click", (e) => {
-  if (!e.target.closest("#tooltip") && !e.target.closest(".fc-event")) hideTooltip();
+  if (
+    !e.target.closest("#tooltip") &&
+    !e.target.closest(".fc-event") &&
+    !e.target.closest(".form-modal")
+  ) {
+    hideTooltip();
+  }
 });
 
 // Test form
 function openTestForm(date, test = null) {  
+  hideTooltip();
+
   const tooltip = document.getElementById("tooltip");
   const body = document.getElementsByTagName("body")[0];
   const form = document.createElement("form");
