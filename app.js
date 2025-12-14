@@ -248,17 +248,24 @@ function renderDayCell(arg) {
         "subject-badge subject-" +
         test.subject.toLowerCase().replace(/\s+/g, "-");
       badge.title = test.subject;
-      badgeContainer.appendChild(badge);
+      // badgeContainer.appendChild(badge);
     });
-    arg.el.appendChild(badgeContainer);
-    if (tests.length > 1) {
-      badgeContainer.title = `${tests.length} preizkusov`;
-    }
+    // arg.el.appendChild(badgeContainer);
+    // if (tests.length > 1) {
+    //   badgeContainer.title = `${tests.length} preizkusov`;
+    // }
   }
 }
 function handleDateClick(info) {
   const date = info.dateStr;
-  showTooltip(date, info.jsEvent.pageX, info.jsEvent.pageY);
+  const d = new Date(date);
+  const sloveneDate = d.toLocaleDateString('sl-SI', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+  
+  showTooltip(date, sloveneDate, info.jsEvent.pageX, info.jsEvent.pageY);
 }
 function handleEventClick(info) {
   info.jsEvent.stopPropagation();
@@ -267,7 +274,7 @@ function handleEventClick(info) {
 }
 
 // Tooltip/popover
-function showTooltip(date, x, y) {
+function showTooltip(date, sloveneDate, x, y) {
   const tooltip = document.getElementById("tooltip");
   tooltip.innerHTML = "";
   tooltip.style.left = x + "px";
@@ -277,11 +284,11 @@ function showTooltip(date, x, y) {
     (t) => !currentGradeFilter || t.grade === currentGradeFilter
   );
   const title = document.createElement("h3");
-  title.textContent = `Preizkusi za ${date}`;
+  title.textContent = `${sloveneDate}`;
   tooltip.appendChild(title);
   if (tests.length === 0) {
     const empty = document.createElement("div");
-    empty.textContent = "Za ta dan ni preizkusov.";
+    empty.textContent = "Na ta dan ni dogodkov.";
     tooltip.appendChild(empty);
   } else {
     tests.sort(
@@ -291,16 +298,13 @@ function showTooltip(date, x, y) {
     tests.forEach((test) => {
       const row = document.createElement("div");
       row.className = "test-row";
-      row.innerHTML = `<span class="subject-badge subject-${test.subject
-        .toLowerCase()
-        .replace(/\s+/g, "-")}" title="${test.subject}"></span>
+      row.innerHTML = `
         <strong>${test.grade}</strong> ${test.subject} <span>${
         test.description || ""
       }</span>`;
       const actions = document.createElement("span");
       actions.innerHTML = `<button onclick="editTest('${test.id}','${date}')">Uredi</button>
-        <button onclick="deleteTestConfirm('${test.id}','${date}')">Izbriši</button>
-        <button onclick="duplicateTest('${test.id}','${date}')">Podvoji</button>`;
+        <button onclick="deleteTestConfirm('${test.id}','${date}')">Izbriši</button>`;
       row.appendChild(actions);
       tooltip.appendChild(row);
     });
