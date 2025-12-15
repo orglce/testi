@@ -277,6 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("calendar"),
     {
       locale: "sl",
+      firstDay: 1,
       buttonText: { today: "Danes" },
       initialView: "dayGridMonth",
       events: fetchTestsAndFormatEvents,
