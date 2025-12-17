@@ -327,9 +327,61 @@ function handleDateClick(info) {
 
 function handleEventClick(info) {
   info.jsEvent.stopPropagation();
-  openTestForm(info.event.startStr, info.event.extendedProps.test);
+
+  const tooltip = document.getElementById("tooltip");
+  tooltip.innerHTML = "";
+  tooltip.style.left = info.jsEvent.pageX + "px";
+  tooltip.style.top = info.jsEvent.pageY + "px";
+  tooltip.classList.add("visible");
+
+  const title = document.createElement("h3");
+  title.textContent = `${info.event.title}`;
+  tooltip.appendChild(title);
+
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "Uredi";
+  editBtn.onclick = () => {
+    openTestForm(info.event.startStr, info.event.extendedProps.test);
+  };
+  tooltip.appendChild(editBtn);
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Izbriši";
+  deleteBtn.onclick = () => {
+    if (confirm("Ali ste prepričani, da želite izbrisati ta dogodek?")) {
+      deleteTest(info.event.id).then(success => {
+        if (success) {
+          showToast("Dogodek uspešno izbrisan");
+          calendar.refetchEvents();
+        }
+      });
+    }
+    hideTooltip();
+  };
+  tooltip.appendChild(deleteBtn);
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "Prekliči";
+  cancelBtn.onclick = hideTooltip;
+  tooltip.appendChild(cancelBtn);
 }
 
+/* =========================
+   DELETE EVENT
+========================= */
+
+function handleDeleteEvent(eventId) {
+  if (confirm("Ali ste prepričani, da želite izbrisati ta dogodek?")) {
+    deleteTest(eventId).then(success => {
+      if (success) {
+        showToast("Dogodek uspešno izbrisan");
+        calendar.refetchEvents();
+      }
+    });
+  }
+}
+
+// Modify the showTooltip function to include a delete button
 function showTooltip(date, titleText, x, y) {
   const tooltip = document.getElementById("tooltip");
   tooltip.innerHTML = "";
@@ -349,6 +401,12 @@ function showTooltip(date, titleText, x, y) {
     const row = document.createElement("div");
     row.className = "test-row";
     row.innerHTML = `<strong>${test.grade}</strong> ${test.subject}`;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Izbriši";
+    deleteBtn.onclick = () => handleDeleteEvent(test.id);
+    row.appendChild(deleteBtn);
+
     tooltip.appendChild(row);
   });
 
