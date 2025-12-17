@@ -28,11 +28,24 @@ const GRADES = BASE_GRADES.flatMap(g => [
 ]);
 
 const SUBJECTS = [
-  "Matematika",
-  "Slovenščina",
-  "Angleščina",
-  "Fizika",
-  "DRUGO",
+    "angleščina",
+    "biologija",
+    "domovinska in državljanska kultura in etika",
+    "fizika",
+    "fizika",
+    "francoščina",
+    "geografija",
+    "glasba",
+    "gospodinjstvo",
+    "kemija",
+    "matematika",
+    "naravoslovje",
+    "nemščina",
+    "slovenski jezik",
+    "šport",
+    "tuji jezik angleščina",
+    "zgodovina",
+    "drugo"
 ];
 
 const SUBJECT_COLORS = {
