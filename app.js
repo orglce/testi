@@ -41,7 +41,7 @@ const SUBJECTS = [
     "matematika",
     "naravoslovje",
     "nemščina",
-    "slovenski jezik",
+    "slovenščina",
     "šport",
     "tuji jezik angleščina",
     "zgodovina",
